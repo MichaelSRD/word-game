@@ -1,101 +1,145 @@
-import Image from "next/image";
+'use client'
+import { match } from "assert";
+import React, { useEffect, useRef, useState } from "react";
+
+const palabras = [
+  "amor", "paz", "vida", "sueño", "esperanza",
+  "alegría", "tristeza", "miedo", "rabia", "sorpresa",
+  "sol", "luna", "estrella", "cielo", "mar",
+  "montaña", "río", "bosque", "ciudad", "campo",
+  "rojo", "verde", "azul", "amarillo", "negro",
+  "blanco", "grande", "pequeño", "alto", "bajo",
+  "rápido", "lento", "fuerte", "débil", "bueno",
+  "malo", "nuevo", "viejo", "primero", "último",
+  "casa", "coche", "libro", "árbol", "perro",
+  "gato", "pájaro", "pez", "flor", "comida",
+  "agua", "fuego", "tierra", "aire", "luz",
+  "sombra", "calor", "frío", "día", "noche",
+  "mañana", "tarde", "noche", "semana", "mes",
+  "año", "hoy", "ayer", "mañana", "siempre",
+  "nunca", "quizás", "sí", "no", "por qué",
+  "cómo", "cuándo", "dónde", "quién", "qué",
+  "pensar", "sentir", "ver", "oír", "hablar",
+  "caminar", "correr", "saltar", "jugar", "trabajar",
+  "estudiar", "leer", "escribir", "dibujar", "crear",
+  "sonreír", "llorar", "reír", "besar", "abrazar",
+  "amigo", "familia", "amor", "felicidad", "paz"
+];
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const inputRef = useRef<(HTMLInputElement | null) [] >([]);
+  const [valores, setValores] = useState<string[]>(['']);  
+  const [silabasOrden, setSilabasOrden]= useState<string[]>([]);
+  const [silabas, setSilabas]= useState<string[]>([]);
+  const [success, setSuccess] = useState(false);
+  const [ mistakes, setMistakes] = useState<string[]>([]);
+  const [palabra, setPalabra] = useState('');
+
+  useEffect(() => {
+    palabraAleatoria();
+  }, []);
+
+  useEffect(()=>{
+    if (palabra) {
+      const separar = palabra.split('');
+      const copiaOrdenada = [...separar];
+  
+      setSilabasOrden(copiaOrdenada);
+      setValores(new Array(copiaOrdenada.length).fill(''));
+      
+      const desordenar = separar.sort(()=>Math.random() - 0.5);
+      setSilabas(desordenar);
+    }
+    
+    },[palabra]);
+
+    useEffect(()=>{
+      if(JSON.stringify(valores) === JSON.stringify(silabasOrden)){
+        setValores(new Array(silabasOrden.length).fill(''));
+        setMistakes([]);
+        alert('Succes');
+        palabraAleatoria();
+      }
+    },[valores, silabasOrden])
+    
+    useEffect(()=>{
+      if (mistakes.length === 5) {
+         setMistakes([]);
+         resetInput()
+         palabraAleatoria()
+      }
+    },[mistakes])
+
+  const resetInput = ()=>{
+    setMistakes([]);
+    setValores(new Array(silabasOrden.length).fill(''));
+  }
+   
+  const handleInputOnchange = (value: string, index: number )=>{
+
+    if (value === silabasOrden[index]) {
+      setValores(prevValores => {
+        const newValores = [...prevValores];
+        newValores[index] = value;
+
+        return newValores;
+    });
+    if (inputRef.current) {
+      inputRef.current[index + 1]?.focus()
+    }
+    }else{
+      setValores(prevValores => {
+        const newValores = [...prevValores];
+        newValores[index] = '';
+        return newValores;
+    });
+    setMistakes(prevValores => {
+      const newError = [...prevValores, value];
+      return newError;
+  });
+    }
+   
+  }
+  const palabraAleatoria = ()=>{
+    const indiceAleatorio = Math.floor(Math.random() * palabras.length);
+    setPalabra(palabras[indiceAleatorio]);
+  }
+   
+  return (
+    <main className="  flex justify-center items-center m-auto w-full h-screen " >
+      <section className="rounded-xl text-center bg-[#030616] w-max p-4 " >
+        <p className="text-[#7429C6] text-2xl font-bold mb-5 ">Word Scramblle</p>
+        <div className=" shadow-sombra tracking-[1rem] text-[2rem] text-[#97A3B6] font-semibold  rounded-lg bg-[rgb(74,85,103)] w-full p-4 flex justify-center " >
+          
+          {silabas.map((item,index)=>(
+              <p key={index}>{item}</p>
+          ))}
+        </div >
+        <div className="flex justify-center space-x-7 mt-6  ">
+        <div className=" text-[#4A5567] flex  items-center  ">Tries({mistakes.length}/5): <span className=" text-[#F2F5F9] flex space-x-1 ml-2 ">
+          {[...Array(5)].map((_,i)=>(
+               <div key={i} className={` h-2 w-2 rounded-full   ${i < mistakes.length ? 'bg-[#7429C6]' : 'bg-[#97A3B6]'  }   `}></div>
+          ))}
+           
+          </span></div>
+          <p className=" text-[#4A5567] ">Mistakes: <span className=" text-[#F2F5F9] "> {mistakes.join(', ')}</span></p>
+          
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <section className={``} >
+        <form  className="flex justify-center mt-11 gap-3" >
+          {silabas.map((item,index)=>(
+            
+               <input key={index} ref={(el) =>{ inputRef.current[index] = el}}  onChange={(event)=>handleInputOnchange( event.target.value, index)} value={valores[index]} type="text" maxLength={1} className=" bg-[#030616]  rounded-md h-12 border-[#97A3B6] border text-center text-xl text-white font-bold w-12 focus-visible:border-[#672171] focus-visible:ring-2 focus-visible:ring-[#672171] focus:outline-none  " />
+            
+          ))}
+          </form>
+        </section>
+        <section className=" mt-11 space-x-8 ">
+          <button onClick={palabraAleatoria} className=" shadow-buttonshadow px-6 py-2 font-bold text-white rounded-lg bg-[#C951E7]  ">Random</button>
+          <button className=" shadow-buttonshadow px-6 py-2 font-bold text-white rounded-lg bg-[#C951E7] " onClick={resetInput} >Reset</button>
+        </section>
+      </section>
+    </main>
   );
 }
