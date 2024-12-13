@@ -1,5 +1,4 @@
 'use client'
-import { match } from "assert";
 import React, { useEffect, useRef, useState } from "react";
 
 const palabras = [
@@ -32,7 +31,6 @@ export default function Home() {
   const [valores, setValores] = useState<string[]>(['']);  
   const [silabasOrden, setSilabasOrden]= useState<string[]>([]);
   const [silabas, setSilabas]= useState<string[]>([]);
-  const [success, setSuccess] = useState(false);
   const [ mistakes, setMistakes] = useState<string[]>([]);
   const [palabra, setPalabra] = useState('');
 
